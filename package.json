@@ -1,0 +1,42 @@
+{
+  "name": "searchtower",
+  "version": "0.0.0",
+  "description": "Nodejs client for Searchtower API",
+  "homepage": "http://searchtower.com",
+  "main": "lib/index.js",
+  "scripts": {
+    "prepublish": "coffee --bare -o lib -c src",
+    "test": "vows test/* --spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/searchtower/searchtower_api_nodejs.git"
+  },
+  "keywords": [
+    "searchtower",
+    "nodejs",
+    "api"
+  ],
+  "directories": {
+    "lib": "./lib"
+  },
+  "dependencies": {
+    "qs": "*",
+    "nconf":  "*",
+    "request":  "*"
+  },
+  "devDependencies": {
+    "coffee-script": "1.x",
+    "vows": "0.5.x"
+  },
+  "engines": {
+    "node": "0.8.x"
+  },
+  "optionalDependencies": {},
+  "author": "SearchTower <support@searchtower.com>",
+  "contributors": [
+    "Daniel Stevens <daniel.stevens@searchtower.com>",
+    "Chaitanya Surapaneni <chaitanya.surapaneni@searchtower.com>"
+  ],
+  "license": "BSD"
+}
