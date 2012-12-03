@@ -23,7 +23,8 @@
   "dependencies": {
     "qs": "*",
     "nconf":  "*",
-    "request":  "*"
+    "request":  "*",
+    "underscore": "*"
   },
   "devDependencies": {
     "coffee-script": "1.x",

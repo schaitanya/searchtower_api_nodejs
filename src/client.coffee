@@ -1,15 +1,50 @@
-https = require 'https'
-queryString = require 'qs'
-request = require 'request'
-Response = require './response'
-conf = require './config/config'
-nconf = require 'nconf'
-server = "http://8b176ef6:23697a7b436f621dc828f6fd338483f0@" + conf.get('server:ip') + ":" + conf.get('server:port')
+https        =  require 'https'
+queryString  =  require 'qs'
+request      =  require 'request'
+Response     =  require './response'
+conf         =  require './config/config'
+nconf        =  require 'nconf'
+_            =  require 'underscore'
 
 module.exports = class Client
 
-  constructor: (@appId, @appKey) ->
-    throw "Requires both appId and appkey" unless @appId or @appkey
+  constructor: (appId, appKey) ->
+    throw "Requires both appId and appKey" unless appId or appKey
+    @server = "http://#{appId}:#{appKey}@" + conf.get('server:ip') + ":" + conf.get('server:port')
+
+  ###
+    route:
+      method
+      uri
+    data:
+      additional: params to add to URI
+      body: request body
+      qs: querystring
+  ###
+  request: (route, data, callback) ->
+    data.body = _.omit data.body, '_name'
+    opts = 
+      url: @server + route.uri
+      method:  route.method
+      body: data.body || ''
+      qs: data.qs || ''
+      json: true
+    request opts, (err, response, body) ->
+      return callback err, null if err
+      resp = JSON.stringify new Response(response, body)
+      return callback resp, null if response.statusCode isnt 200
+      return callback null, resp if response.statusCode is 200
+
+  ###
+    Get Index
+    data:
+      name: Required
+  ###
+  getIndex: (data, callback) ->
+    route = conf.get 'routes:getIndex'
+    route.uri += data.name
+    @request route, data, (err, cb) ->
+      callback err, cb
 
   ###
     create:
@@ -45,42 +80,68 @@ module.exports = class Client
       callback  null, cb
 
   ###
+    List Action -> List all indexes
+  ###
+  list: (data, callback) ->
+    @request conf.get('routes:listIndex'), {}, (err, cb) ->
+      callback err, cb
+
+  ###
     addDocument:
       upload a doc
   ###
   addDocument:  (data, callback) ->
-    # throw "required index and document name" unless data.index || data.name
+    throw "required index and document name" unless data.index || data.name
     route = conf.get('routes:addDocument')
     route.uri += "#{data.index}/#{data.name}"
     opts = 
-      url:  server + route.uri
+      url:  @server + route.uri
       method: route.method
       body: data.body
     request opts, (err, response, body) ->
       callback  err,  body
 
   ###
-    route:
-      method
-      uri
-    data:
-      additional: params to add to URI
-      body: request body
-      qs: querystring
+    listAction -> List all Documents
+    params:
+      index (required)
   ###
-  request: (route, data, callback) ->
+  listDocuments: (data, callback) ->
+    throw "required index name" unless  data.index
+    route = conf.get('routes:listDocuments')
+    route.uri  +=  data.index
+    @request  route, data, (err, cb) ->
+      callback  err,  cb
+
+
+  ###
+    deleteDocument
+  ###
+  deleteDocument: (data, callback)  ->
+    throw "required index and document name" unless data.index || data.name
+    route = conf.get('routes:deleteDocument')
+    route.uri += "#{data.index}/#{data.name}"
     opts = 
-      url: server + route.uri
-      method:  route.method
-      body: data.body || ''
-      qs: data.qs || ''
-      json: true
+      url:  @server + route.uri
+      method: route.method
+      body: data.body
     request opts, (err, response, body) ->
-      console.log response, body
-      return callback err, null if err
-      resp = JSON.stringify new Response(response, body)
-      return callback resp, null if response.statusCode isnt 200
-      return callback null, resp if response.statusCode is 200
+      callback  err,  body
+
+  ###
+    documentDetails
+  ###
+  documentDetails:  (data, callback) ->
+    throw "required index and document name" unless data.index || data.name
+    route = conf.get 'routes:documentDetails'
+    route.uri  += "#{data.index}/#{data.name}?details"
+    opts = 
+      url:  @server + route.uri
+      method: route.method
+      body: data.body
+    request opts, (err, response, body) ->
+      callback  err,  body
+
 
   ###
     Search Action
@@ -96,34 +157,3 @@ module.exports = class Client
     route.uri += data.name
     @request route, data, (err, cb) ->
       callback null, cb
-
-  ###
-    List Action -> List all indexes
-
-  ###
-  list: (data, callback) ->
-    @request conf.get('routes:listIndex'), {}, (err, cb) ->
-      callback err, cb
-
-  ###
-    listAction -> List all Documents
-    params:
-      index (required)
-  ###
-  listDocuments: (data, callback) ->
-    throw "required index name" unless  data.index
-    route = conf.get('routes:listDocuments')
-    route.uri  +=  data.index
-    @request  route, data, (err, cb) ->
-      callback  err,  cb
-
-  ###
-    Get Index
-    data:
-      name: Required
-  ###
-  getIndex: (data, callback) ->
-    route = conf.get 'routes:getIndex'
-    route.uri += data.name
-    @request route, data, (err, cb) ->
-      callback err, cb    

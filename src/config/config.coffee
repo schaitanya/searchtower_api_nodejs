@@ -29,8 +29,14 @@ conf.defaults
       method: "DELETE"
     addDocument:
       uri:  "/v1/documents/"
-      method: "POST"
+      method: "PUT"
     listDocuments:
+      uri:  "/v1/documents/"
+      method: "GET"
+    deleteDocument:
+      uri:  "/v1/documents/"
+      method: "DELETE"
+    documentDetails:
       uri:  "/v1/documents/"
       method: "GET"
 
