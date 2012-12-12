@@ -1,9 +1,8 @@
-# restify = require 'restify'
 class Response
 
   constructor: (res, body) ->
     @code = res.statusCode
-    @message = "Noice"
+    @message = ""
     @data = body
 
   # error:   ->

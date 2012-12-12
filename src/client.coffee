@@ -5,7 +5,7 @@ Response     =  require './response'
 conf         =  require './config/config'
 nconf        =  require 'nconf'
 _            =  require 'underscore'
-
+# server       =  "http://8b176ef6:23697a7b436f621dc828f6fd338483f0@" + conf.get('server:ip') + ":" + conf.get('server:port')
 module.exports = class Client
 
   constructor: (appId, appKey) ->
@@ -50,7 +50,7 @@ module.exports = class Client
     create:
       Create a new Index
   ###
-  create: (data, callback) ->
+  createIndex: (data, callback) ->
     throw "required fields missing" unless data.body.name
     route = conf.get('routes:createIndex')
     @request route, data, (err, cb) ->
