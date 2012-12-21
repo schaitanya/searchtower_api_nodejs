@@ -11,7 +11,7 @@ conf.defaults
   routes:
     search: 
       uri:  "/v1/search/"
-      method: "GET"
+      method: "POST"
     listIndex:
       uri:  "/v1/indexes"
       method: "GET"

@@ -6,8 +6,7 @@ conf         =  require './config/config'
 nconf        =  require 'nconf'
 _            =  require 'underscore'
 fs = require 'fs'
-chunks = []
-FormData = require 'form-data'
+chunks = 
 
 # server       =  "http://8b176ef6:23697a7b436f621dc828f6fd338483f0@" + conf.get('server:ip') + ":" + conf.get('server:port')
 module.exports = class Client
@@ -26,7 +25,7 @@ module.exports = class Client
       qs: querystring
   ###
   request: (route, data, callback) ->
-    data.body = _.omit data.body, '_name'
+    data.body = _.omit data.body, '_name' if typeof data.body is 'object'
     opts = 
       url: @server + route.uri
       method:  route.method
@@ -98,15 +97,9 @@ module.exports = class Client
     throw "required index and document name" unless data.index || data.name
     route = conf.get('routes:addDocument')
     route.uri += "#{data.index}/#{data.name}"
-    reader = fs.createReadStream(data.body)
-    reader.on 'data', (chunk) ->
-      chunks += chunk
+    fs.createReadStream(data.body).pipe request.put @server + route.uri, (err, resp, body) ->
+      callback err, body
 
-    reader.on 'end', =>
-      request.put @server + route.uri, { body: chunks }, (err, rsp, body) ->
-        console.log err, body
-        callback  err,  body
-         
 
   ###
     listAction -> List all Documents
@@ -142,7 +135,7 @@ module.exports = class Client
     throw "required index and document name" unless data.index || data.name
     route = conf.get 'routes:documentDetails'
     route.uri  += "#{data.index}/#{data.name}?details"
-    opts = 
+    opts =
       url:  @server + route.uri
       method: route.method
       body: data.body
@@ -158,9 +151,10 @@ module.exports = class Client
     callback: callback fn
   ###
   search: (data, callback) ->
-    throw "required fields missing" unless data.name || data.qs || data.body
+    # throw "required fields missing" unless data.name
+     # || data.qs || data.body
     throw "query and body detected, only one not both" if data.qs && data.body
     route = conf.get('routes:search')
-    route.uri += data.name
+    route.uri += data.index
     @request route, data, (err, cb) ->
-      callback null, cb
+      callback err, cb
