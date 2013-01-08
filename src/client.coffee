@@ -5,10 +5,8 @@ Response     =  require './response'
 conf         =  require './config/config'
 nconf        =  require 'nconf'
 _            =  require 'underscore'
-fs = require 'fs'
-chunks = 
+fs           = require 'fs'
 
-# server       =  "http://8b176ef6:23697a7b436f621dc828f6fd338483f0@" + conf.get('server:ip') + ":" + conf.get('server:port')
 module.exports = class Client
 
   constructor: (appId, appKey) ->
@@ -134,14 +132,13 @@ module.exports = class Client
   documentDetails:  (data, callback) ->
     throw "required index and document name" unless data.index || data.name
     route = conf.get 'routes:documentDetails'
-    route.uri  += "#{data.index}/#{data.name}?details"
+    route.uri  += "#{data.index}/" + encodeURIComponent(data.name) + "?details"
     opts =
       url:  @server + route.uri
       method: route.method
       body: data.body
     request opts, (err, response, body) ->
       callback  err,  body
-
 
   ###
     Search Action
