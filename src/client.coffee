@@ -5,7 +5,7 @@ Response     =  require './response'
 conf         =  require './config/config'
 nconf        =  require 'nconf'
 _            =  require 'underscore'
-fs           = require 'fs'
+fs           =  require 'fs'
 
 module.exports = class Client
 
@@ -95,8 +95,16 @@ module.exports = class Client
     throw "required index and document name" unless data.index || data.name
     route = conf.get('routes:addDocument')
     route.uri += "#{data.index}/#{data.name}"
-    fs.createReadStream(data.body).pipe request.put @server + route.uri, (err, resp, body) ->
-      callback err, body
+    fs.stat data.body, (error, stat) =>
+      return callback error, null if error
+      opts = 
+        url:  @server + route.uri
+        method: 'PUT'
+        headers:
+          'Content-Length': stat.size
+
+      fs.createReadStream(data.body).pipe request opts, (err, resp, body) =>
+        callback err, body
 
 
   ###
@@ -118,7 +126,7 @@ module.exports = class Client
   deleteDocument: (data, callback)  ->
     throw "required index and document name" unless data.index || data.name
     route = conf.get('routes:deleteDocument')
-    route.uri += "#{data.index}/#{data.name}"
+    route.uri += "#{data.index}/#{encodeURIComponent(data.name)}"
     opts = 
       url:  @server + route.uri
       method: route.method
@@ -148,8 +156,7 @@ module.exports = class Client
     callback: callback fn
   ###
   search: (data, callback) ->
-    # throw "required fields missing" unless data.name
-     # || data.qs || data.body
+    throw "required fields missing" unless data.name || data.qs || data.body
     throw "query and body detected, only one not both" if data.qs && data.body
     route = conf.get('routes:search')
     route.uri += data.index
