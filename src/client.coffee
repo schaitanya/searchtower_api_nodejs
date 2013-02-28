@@ -55,19 +55,17 @@ module.exports = class Client
     throw "required fields missing" unless data.body.name
     route = conf.get('routes:createIndex')
     @request route, data, (err, cb) ->
-      callback err, null if err
-      callback null, cb
+      callback err, cb
 
   ###
     update:
       Update Index
   ###
-  update: (data, callback) ->
+  updateIndex: (data, callback) ->
     route = conf.get('routes:updateIndex')
     route.uri += data.name 
     @request route, data, (err, cb) ->
-      callback err, null if err
-      callback null, cb
+      callback err, cb
 
   ###
     delete:
@@ -77,13 +75,12 @@ module.exports = class Client
     route = conf.get('routes:deleteIndex')
     route.uri += data.name
     @request route, data, (err, cb) ->
-      callback  err, null if err
-      callback  null, cb
+      callback err, cb
 
   ###
     List Action -> List all indexes
   ###
-  list: (data, callback) ->
+  listIndexes: (data, callback) ->
     @request conf.get('routes:listIndex'), {}, (err, cb) ->
       callback err, cb
 
