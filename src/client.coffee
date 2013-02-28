@@ -32,7 +32,7 @@ module.exports = class Client
       json: true
     request opts, (err, response, body) ->
       return callback err, null if err
-      resp = JSON.stringify new Response(response, body)
+      resp = new Response(response, body)
       return callback resp, null if response.statusCode isnt 200
       return callback null, resp if response.statusCode is 200
 
@@ -94,7 +94,7 @@ module.exports = class Client
   addDocument:  (data, callback) ->
     throw "required index and document name" unless data.index || data.name
     route = conf.get('routes:addDocument')
-    route.uri += "#{data.index}/#{data.name}"
+    route.uri += "#{data.index}/" + encodeURIComponent "#{data.name}"
     fs.stat data.body, (error, stat) =>
       return callback error, null if error
       opts = 
