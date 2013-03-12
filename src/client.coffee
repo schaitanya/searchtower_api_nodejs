@@ -9,10 +9,16 @@ fs           =  require 'fs'
 
 module.exports = class Client
 
+  ###
+    Constructor
+    parameters:
+      appId   required
+      appKey  required
+  ###
   constructor: (appId, appKey) ->
     throw "Requires both appId and appKey" unless appId or appKey
-    @server = "http://#{appId}:#{appKey}@" + conf.get('server:ip') + ":" + conf.get('server:port')
-
+    @server = "http://#{appId}:#{appKey}@#{conf.get('server:ip')}:#{conf.get('server:port')}"
+    
   ###
     route:
       method
@@ -157,5 +163,47 @@ module.exports = class Client
     throw "query and body detected, only one not both" if data.qs && data.body
     route = conf.get('routes:search')
     route.uri += data.index
+    route.method = if data.qs then 'GET' else 'POST'
     @request route, data, (err, cb) ->
       callback err, cb
+
+  ###
+    Create Folder
+    required:
+      content-type: searchtower/folder
+      content-size: 0
+  ###
+  createFolder: (data, callback) ->
+    route = conf.get('routes:addDocument')
+    route.uri += "#{data.index}/#{encodeURIComponent data.folder+'/'}"
+    opts =
+      url:  @server + route.uri
+      method: 'PUT'
+      headers:
+        'content-type': 'searchtower/folder'
+        'content-size': 0
+    request opts, (err, resp, body) ->
+      callback err, body
+
+  ###
+    Add Url to "remote" index
+  ###
+  addRemoteFile:  (data, callback) ->
+    route = conf.get('routes:addDocument')
+    route.uri += "#{data.index}/#{encodeURIComponent data.url}?url=#{data.url}"
+    opts =
+      url:  @server + route.uri
+      method: 'PUT'
+    request opts, (err, resp, body) ->
+      callback err, body
+
+  ###
+    downloadDocument
+  ###
+  downloadDocument: (data, callback) ->
+    throw "requires both index and document name" unless data.index or data.docName
+    route = conf.get('routes:downloadDocument')
+    route.uri += "#{data.index}/" + encodeURIComponent(data.docName)
+    route.url = @server + route.uri
+    request route, (err, response, body) =>
+      callback err, response.headers, body

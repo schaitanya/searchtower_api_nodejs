@@ -37,6 +37,9 @@ conf.defaults
       uri:  "/v1/documents/"
       method: "DELETE"
     documentDetails:
+      uri:  "/v1/search/"
+      method: "GET"
+    downloadDocument:
       uri:  "/v1/documents/"
       method: "GET"
 
