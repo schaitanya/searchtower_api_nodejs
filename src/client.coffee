@@ -18,7 +18,7 @@ module.exports = class Client
   constructor: (appId, appKey) ->
     throw "Requires both appId and appKey" unless appId or appKey
     @server = "http://#{appId}:#{appKey}@#{conf.get('server:ip')}:#{conf.get('server:port')}"
-    
+
   ###
     route:
       method
@@ -130,12 +130,8 @@ module.exports = class Client
     throw "required index and document name" unless data.index || data.name
     route = conf.get('routes:deleteDocument')
     route.uri += "#{data.index}/#{encodeURIComponent(data.name)}"
-    opts = 
-      url:  @server + route.uri
-      method: route.method
-      body: data.body
-    request opts, (err, response, body) ->
-      callback  err,  body
+    @request route, data, (err, body) ->
+      callback err, body
 
   ###
     documentDetails
@@ -144,12 +140,8 @@ module.exports = class Client
     throw "required index and document name" unless data.index || data.name
     route = conf.get 'routes:documentDetails'
     route.uri  += "#{data.index}/" + encodeURIComponent(data.name) + "?details"
-    opts =
-      url:  @server + route.uri
-      method: route.method
-      body: data.body
-    request opts, (err, response, body) ->
-      callback  err,  body
+    @request route, data, (err, body) ->
+      callback err, body
 
   ###
     Search Action
