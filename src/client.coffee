@@ -17,7 +17,7 @@ module.exports = class Client
   ###
   constructor: (appId, appKey) ->
     throw "Requires both appId and appKey" unless appId or appKey
-    @server = "http://#{appId}:#{appKey}@#{conf.get('server:ip')}:#{conf.get('server:port')}"
+    @server = "https://#{appId}:#{appKey}@#{conf.get('server:ip')}:#{conf.get('server:port')}"
 
   ###
     route:
