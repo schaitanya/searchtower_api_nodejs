@@ -3,7 +3,6 @@ queryString  =  require 'qs'
 request      =  require 'request'
 Response     =  require './response'
 conf         =  require './config/config'
-nconf        =  require 'nconf'
 _            =  require 'underscore'
 fs           =  require 'fs'
 
@@ -36,11 +35,10 @@ module.exports = class Client
       body: data.body || ''
       qs: data.qs || ''
       json: true
-    request opts, (err, response, body) ->
-      return callback err, null if err
-      resp = new Response(response, body)
-      return callback resp, null if response.statusCode isnt 200
-      return callback null, resp if response.statusCode is 200
+      strictSSL:  false
+    request opts, (err, response, body) =>
+      @_response err, response, body, (err, body) =>
+        callback err, body
 
   ###
     Get Index
@@ -103,11 +101,13 @@ module.exports = class Client
       opts = 
         url:  @server + route.uri
         method: 'PUT'
+        strictSSL:  false
         headers:
           'Content-Length': stat.size
 
-      fs.createReadStream(data.body).pipe request opts, (err, resp, body) =>
-        callback err, body
+      fs.createReadStream(data.body).pipe request opts, (err, response, body) =>
+        @_response err, response, body, (err, body) =>
+          callback err, body
 
 
   ###
@@ -169,13 +169,15 @@ module.exports = class Client
     route = conf.get('routes:addDocument')
     route.uri += "#{data.index}/#{encodeURIComponent data.folder+'/'}"
     opts =
+      strictSSL:  false
       url:  @server + route.uri
       method: 'PUT'
       headers:
         'content-type': 'searchtower/folder'
         'content-size': 0
-    request opts, (err, resp, body) ->
-      callback err, body
+    request opts, (err, response, body) =>
+      @_response err, response, body, (err, body) =>
+        callback err, body
 
   ###
     Add Url to "remote" index
@@ -186,8 +188,10 @@ module.exports = class Client
     opts =
       url:  @server + route.uri
       method: 'PUT'
-    request opts, (err, resp, body) ->
-      callback err, body
+      strictSSL:  false
+    request opts, (err, response, body) =>
+      @_response err, response, body, (err, body) =>
+        callback err, body
 
   ###
     downloadDocument
@@ -197,5 +201,23 @@ module.exports = class Client
     route = conf.get('routes:downloadDocument')
     route.uri += "#{data.index}/" + encodeURIComponent(data.docName)
     route.url = @server + route.uri
+    route.strictSSL =  false
     request route, (err, response, body) =>
       callback err, response.headers, body
+
+  ###
+    getUserAccess
+  ###
+  userAccess: (data, callback) ->
+    throw "requires both index name" unless data.index
+    route = conf.get('routes:getUserAceess')
+    route.uri += "#{data.index}/acl"
+    route.method = data.method || "GET"
+    @request route, data, (err, cb) ->
+      callback err, cb
+
+  _response: (err, response, body, callback) ->
+    return callback err, null if err
+    resp = new Response(response, body)
+    return callback resp, null if response.statusCode isnt 200
+    return callback null, resp if response.statusCode is 200

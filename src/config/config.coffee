@@ -4,7 +4,7 @@ conf.defaults
 
   # Server Parameters
   server:
-    ip:      "0.0.0.0"
+    ip:      "api.dev-st.info"
     port:    8080
 
   # Routes
@@ -42,5 +42,14 @@ conf.defaults
     downloadDocument:
       uri:  "/v1/documents/"
       method: "GET"
+    getUserAceess:
+      uri:  "/v1/indexes/"
+      method: "GET"
+    updateUserAccess:
+      uri:  "/v1/indexes/"
+      method: "PUT"
+    deleteUserAccess:
+      uri:  "/v1/indexes/"
+      method: "DELETE"
 
 module.exports = conf
