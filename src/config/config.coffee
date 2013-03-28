@@ -2,11 +2,6 @@ conf = require 'nconf'
 
 conf.defaults
 
-  # Server Parameters
-  server:
-    ip:      "api.dev-st.info"
-    port:    8080
-
   # Routes
   routes:
     search: 

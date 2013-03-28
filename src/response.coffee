@@ -2,7 +2,7 @@ class Response
 
   constructor: (res, body) ->
     @code = res.statusCode
-    @message = ""
+    @message = body.message
     @data = body
 
   # error:   ->

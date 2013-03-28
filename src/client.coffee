@@ -14,9 +14,9 @@ module.exports = class Client
       appId   required
       appKey  required
   ###
-  constructor: (appId, appKey) ->
-    throw "Requires both appId and appKey" unless appId or appKey
-    @server = "https://#{appId}:#{appKey}@#{conf.get('server:ip')}:#{conf.get('server:port')}"
+  constructor: (host, appId, appKey) ->
+    throw "Requires host, appId and appKey" unless appId or appKey or host
+    @server = "https://#{appId}:#{appKey}@#{host}"
 
   ###
     route:
@@ -48,8 +48,8 @@ module.exports = class Client
   getIndex: (data, callback) ->
     route = conf.get 'routes:getIndex'
     route.uri += data.name
-    @request route, data, (err, cb) ->
-      callback err, cb
+    @request route, data, (err, body) ->
+      callback err, body
 
   ###
     create:
@@ -58,8 +58,8 @@ module.exports = class Client
   createIndex: (data, callback) ->
     throw "required fields missing" unless data.body.name
     route = conf.get('routes:createIndex')
-    @request route, data, (err, cb) ->
-      callback err, cb
+    @request route, data, (err, body) ->
+      callback err, body
 
   ###
     update:
@@ -68,8 +68,8 @@ module.exports = class Client
   updateIndex: (data, callback) ->
     route = conf.get('routes:updateIndex')
     route.uri += data.name 
-    @request route, data, (err, cb) ->
-      callback err, cb
+    @request route, data, (err, body) ->
+      callback err, body
 
   ###
     delete:
@@ -78,15 +78,15 @@ module.exports = class Client
   deleteIndex: (data, callback) ->
     route = conf.get('routes:deleteIndex')
     route.uri += data.name
-    @request route, data, (err, cb) ->
-      callback err, cb
+    @request route, data, (err, body) ->
+      callback err, body
 
   ###
     List Action -> List all indexes
   ###
   listIndexes: (data, callback) ->
-    @request conf.get('routes:listIndex'), {}, (err, cb) ->
-      callback err, cb
+    @request conf.get('routes:listIndex'), {}, (err, body) ->
+      callback err, body
 
   ###
     addDocument:
@@ -119,8 +119,8 @@ module.exports = class Client
     throw "required index name" unless  data.index
     route = conf.get('routes:listDocuments')
     route.uri  +=  data.index
-    @request  route, data, (err, cb) ->
-      callback  err,  cb
+    @request  route, data, (err, body) ->
+      callback  err,  body
 
 
   ###
@@ -156,8 +156,8 @@ module.exports = class Client
     route = conf.get('routes:search')
     route.uri += data.index
     route.method = if data.qs then 'GET' else 'POST'
-    @request route, data, (err, cb) ->
-      callback err, cb
+    @request route, data, (err, body) ->
+      callback err, body
 
   ###
     Create Folder
@@ -184,11 +184,10 @@ module.exports = class Client
   ###
   addRemoteFile:  (data, callback) ->
     route = conf.get('routes:addDocument')
-    route.uri += "#{data.index}/#{encodeURIComponent data.url}?url=#{data.url}"
-    opts =
-      url:  @server + route.uri
-      method: 'PUT'
-      strictSSL:  false
+    route.uri += "#{data.index}/#{encodeURIComponent data.url}?url=#{encodeURIComponent data.url}"
+    route.method = "PUT"
+    @request route, data, (err, cb) ->
+      callback err, cb
     request opts, (err, response, body) =>
       @_response err, response, body, (err, body) =>
         callback err, body
@@ -213,8 +212,8 @@ module.exports = class Client
     route = conf.get('routes:getUserAceess')
     route.uri += "#{data.index}/acl"
     route.method = data.method || "GET"
-    @request route, data, (err, cb) ->
-      callback err, cb
+    @request route, data, (err, body) ->
+      callback err, body
 
   _response: (err, response, body, callback) ->
     return callback err, null if err
