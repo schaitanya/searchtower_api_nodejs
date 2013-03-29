@@ -19,12 +19,12 @@ module.exports = class Client
   ###
     Constructor
     parameters:
-      appId   required
-      appKey  required
+      apiId   required
+      apiKey  required
   ###
-  constructor: (host, appId, appKey) ->
-    throw "Requires host, appId and appKey" unless appId or appKey or host
-    @server = "https://#{appId}:#{appKey}@#{host}"
+  constructor: (host, apiId, apiKey) ->
+    throw "Requires host, apiId and apiKey" unless apiId or apiKey or host
+    @server = "https://#{apiId}:#{apiKey}@#{host}"
 
   ###
     route:
@@ -138,7 +138,7 @@ module.exports = class Client
       upload a doc
   ###
   addDocument:  (data, callback) ->
-    throw "required index and document name" unless data.index and data.name
+    throw "required index and document name" unless data.index? and data.name?
     route = conf.get('routes:addDocument')
     route.uri  = _.template route.uri, { index: data.index, name: encodeURIComponent(data.name) }
     fs.stat data.body, (error, stat) =>
@@ -167,16 +167,38 @@ module.exports = class Client
       callback  err,  body
 
   ###
+    checkDocument
+  ###
+  checkDocument: (data, callback) ->
+    throw "requires both index and document name" unless data.index? and data.name?
+    route = conf.get('routes:downloadDocument')
+    route.uri = _.template route.uri, { index: data.index, name: encodeURIComponent(data.name) }
+    route.url = @server + route.uri
+    route.method = "HEAD"
+    route.strictSSL =  false
+
+    request route, (error, response, body) ->
+      console.log error, body, response.statusCode
+      return callback true, null if error or response.statusCode isnt 200
+      return callback null, null, response.headers
+
+  ###
     downloadDocument
   ###
-  downloadDocument: (data, callback) ->
+  downloadDocument: (writeStream, data, callback) ->
     throw "requires both index and document name" unless data.index? and data.name?
     route = conf.get('routes:downloadDocument')
     route.uri = _.template route.uri, { index: data.index, name: encodeURIComponent(data.name) }
     route.url = @server + route.uri
     route.strictSSL =  false
-    request route, (err, response, body) =>
-      callback err, response.headers, body
+    req = request route
+    req.pipe writeStream
+
+    req.on 'error', (error) ->
+      callback error, null
+
+    req.on 'end', ->
+      callback null, null
 
   ###
     deleteDocument
