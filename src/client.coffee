@@ -129,7 +129,7 @@ module.exports = class Client
   deleteIndex: (data, callback) ->
     throw "requires index name" unless data.index?
     route = conf.get('routes:deleteIndex')
-    route.uri  = _.template route.uri, { index: data.name }
+    route.uri  = _.template route.uri, { index: data.index }
     @request route, data, (err, body) ->
       callback err, body
 
