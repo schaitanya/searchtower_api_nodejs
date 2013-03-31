@@ -141,6 +141,9 @@ module.exports = class Client
     throw "required index and document name" unless data.index? and data.name?
     route = conf.get('routes:addDocument')
     route.uri  = _.template route.uri, { index: data.index, name: encodeURIComponent(data.name) }
+    route.url = @server + route.uri
+    route.strictSSL =  false
+
     fs.stat data.body, (error, stat) =>
       return callback error, null if error
       opts = 
@@ -153,6 +156,7 @@ module.exports = class Client
       fs.createReadStream(data.body).pipe request opts, (err, response, body) =>
         @_response err, response, body, (err, body) =>
           callback err, body
+
 
   ###
     listAction -> List all Documents
@@ -178,7 +182,6 @@ module.exports = class Client
     route.strictSSL =  false
 
     request route, (error, response, body) ->
-      console.log error, body, response.statusCode
       return callback true, null if error or response.statusCode isnt 200
       return callback null, null, response.headers
 
@@ -275,10 +278,7 @@ module.exports = class Client
     route.uri = _.template(route.uri, { index: data.index, name: encodeURIComponent(data.url) }) + "?url=#{encodeURIComponent data.url}"
     route.method = "PUT"
     @request route, data, (err, cb) ->
-      callback err, cb
-    request opts, (err, response, body) =>
-      @_response err, response, body, (err, body) =>
-        callback err, body  
+      callback err, cb    
 
   _response: (err, response, body, callback) ->
     return callback err, null if err
