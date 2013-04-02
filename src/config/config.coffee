@@ -44,7 +44,7 @@ conf.defaults
       uri:  "/v1/documents/{{index}}/{{name}}"
       method: "GET"
     deleteDocument:
-      uri:  "/v1/documents/"
+      uri:  "/v1/documents/{{index}}/{{name}}"
       method: "DELETE"
     restoreDocument:
       uri: "/v1/documents/{{index}}/{{name}}/restore"
