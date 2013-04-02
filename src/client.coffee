@@ -43,7 +43,6 @@ module.exports = class Client
       body: data.body || ''
       qs: data.qs || ''
       json: true
-      strictSSL:  false
     request opts, (err, response, body) =>
       @_response err, response, body, (err, body) =>
         callback err, body
@@ -142,14 +141,12 @@ module.exports = class Client
     route = conf.get('routes:addDocument')
     route.uri  = _.template route.uri, { index: data.index, name: encodeURIComponent(data.name) }
     route.url = @server + route.uri
-    route.strictSSL =  false
 
     fs.stat data.body, (error, stat) =>
       return callback error, null if error
       opts = 
         url:  @server + route.uri
         method: 'PUT'
-        strictSSL:  false
         headers:
           'Content-Length': stat.size
 
@@ -179,7 +176,6 @@ module.exports = class Client
     route.uri = _.template route.uri, { index: data.index, name: encodeURIComponent(data.name) }
     route.url = @server + route.uri
     route.method = "HEAD"
-    route.strictSSL =  false
 
     request route, (error, response, body) ->
       return callback true, null if error or response.statusCode isnt 200
@@ -193,7 +189,6 @@ module.exports = class Client
     route = conf.get('routes:downloadDocument')
     route.uri = _.template route.uri, { index: data.index, name: encodeURIComponent(data.name) }
     route.url = @server + route.uri
-    route.strictSSL =  false
     req = request route
     req.pipe writeStream
 
@@ -259,7 +254,6 @@ module.exports = class Client
     route = conf.get('routes:addDocument')
     route.uri = _.template route.uri, { index: data.index, name: encodeURIComponent(data.name + '/') }
     opts =
-      strictSSL:  false
       url:  @server + route.uri
       method: 'PUT'
       headers:
