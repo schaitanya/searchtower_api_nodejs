@@ -2,6 +2,11 @@ conf = require 'nconf'
 
 conf.defaults
 
+  # Server
+  api:
+
+    host: "api.searchtower.com"
+
   # Routes
   routes:
 

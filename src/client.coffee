@@ -5,7 +5,7 @@ conf         =  require './config/config'
 _            =  require 'underscore'
 fs           =  require 'fs'
 
-_.templateSettings = 
+_.templateSettings =
   interpolate : /\{\{(.+?)\}\}/g
 
 class Response
@@ -22,9 +22,9 @@ module.exports = class Client
       apiId   required
       apiKey  required
   ###
-  constructor: (host, apiId, apiKey) ->
-    throw "Requires host, apiId and apiKey" unless apiId or apiKey or host
-    @server = "https://#{apiId}:#{apiKey}@#{host}"
+  constructor: (apiId, apiKey) ->
+    throw "Requires apiId and apiKey" unless apiId? or apiKey? or host?
+    @server = "https://#{apiId}:#{apiKey}@#{conf.get('api:host')}"
 
   ###
     route:
@@ -37,7 +37,7 @@ module.exports = class Client
   ###
   request: (route, data, callback) ->
     data.body = _.omit data.body, '_name' if typeof data.body is 'object'
-    opts = 
+    opts =
       url: @server + route.uri
       method:  route.method
       body: data.body || ''
@@ -144,7 +144,7 @@ module.exports = class Client
 
     fs.stat data.body, (error, stat) =>
       return callback error, null if error
-      opts = 
+      opts =
         url:  @server + route.uri
         method: 'PUT'
         headers:
@@ -230,7 +230,7 @@ module.exports = class Client
 
   ###
     Search Action
-    data : 
+    data :
       name Required
       qs/body : Either one not both
     callback: callback fn
@@ -272,7 +272,7 @@ module.exports = class Client
     route.uri = _.template(route.uri, { index: data.index, name: encodeURIComponent(data.url) }) + "?url=#{encodeURIComponent data.url}"
     route.method = "PUT"
     @request route, data, (err, cb) ->
-      callback err, cb    
+      callback err, cb
 
   _response: (err, response, body, callback) ->
     return callback err, null if err
