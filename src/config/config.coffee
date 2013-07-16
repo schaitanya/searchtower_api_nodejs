@@ -4,7 +4,6 @@ conf.defaults
 
   # Server
   api:
-
     host: "api.searchtower.com"
 
   # Routes
@@ -59,7 +58,7 @@ conf.defaults
     documentDetails:
       uri:  "/v1/search/{{index}}/{{name}}"
       method: "GET"
-    search: 
+    search:
       uri:  "/v1/search/{{index}}"
       method: "POST"
 
