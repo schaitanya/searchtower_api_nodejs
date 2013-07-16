@@ -1,6 +1,6 @@
 {
   "name": "searchtower",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Nodejs client for Searchtower API",
   "homepage": "http://searchtower.com",
   "main": "lib/index.js",
